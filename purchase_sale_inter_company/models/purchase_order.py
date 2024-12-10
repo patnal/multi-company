@@ -155,16 +155,30 @@ class PurchaseOrder(models.Model):
         :rtype dest_company : res.company record
         :param sale_order : the Sale Order
         """
-        new_line = self.env["sale.order.line"].new(
-            {
-                "order_id": sale_order.id,
-                "product_id": purchase_line.product_id.id,
-                "product_uom": purchase_line.product_uom.id,
-                "product_uom_qty": purchase_line.product_qty,
-                "auto_purchase_line_id": purchase_line.id,
-                "display_type": purchase_line.display_type,
-            }
-        )
+        if purchase_line.product_packaging_id:
+            new_line = self.env["sale.order.line"].new(
+                {
+                    "order_id": sale_order.id,
+                    "product_id": purchase_line.product_id.id,
+                    "product_uom": purchase_line.product_uom.id,
+                    "product_uom_qty": purchase_line.product_qty,
+                    "auto_purchase_line_id": purchase_line.id,
+                    "display_type": purchase_line.display_type,
+                    "product_packaging_id":purchase_line.product_packaging_id.id,
+                    "product_packaging_qty":purchase_line.product_packaging_qty,
+                }
+            )
+        else:
+            new_line = self.env["sale.order.line"].new(
+                {
+                    "order_id": sale_order.id,
+                    "product_id": purchase_line.product_id.id,
+                    "product_uom": purchase_line.product_uom.id,
+                    "product_uom_qty": purchase_line.product_qty,
+                    "auto_purchase_line_id": purchase_line.id,
+                    "display_type": purchase_line.display_type,
+                }
+            )
         for onchange_method in new_line._onchange_methods["product_id"]:
             onchange_method(new_line)
         new_line.update({"product_uom": purchase_line.product_uom.id})
